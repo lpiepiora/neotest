@@ -20,14 +20,10 @@ function AdapterGroup:adapters_with_root_dir(cwd)
   return adapters
 end
 
-function AdapterGroup:adapters_matching_open_bufs(existing_roots)
-  local function is_under_roots(path)
-    for _, root in ipairs(existing_roots) do
-      if vim.startswith(path, root) then
-        return true
-      end
-    end
-    return false
+function AdapterGroup:adapters_matching_open_bufs(existing_adapters_with_root)
+  local registered = {}
+  for _, adapter_with_root in ipairs(existing_adapters_with_root) do
+    registered[adapter_with_root.adapter.name] = true
   end
 
   local adapters = {}
@@ -42,15 +38,13 @@ function AdapterGroup:adapters_matching_open_bufs(existing_roots)
     return i, real or false
   end, buffers)
 
-  local matched_files = {}
   for _, path in ipairs(paths) do
-    if path and not is_under_roots(path) then
+    if path then
       for _, adapter in ipairs(self:_path_adapters(path)) do
-        if adapter.is_test_file(path) and not matched_files[path] then
+        if not registered[adapter.name] and adapter.is_test_file(path) then
+          registered[adapter.name] = true
           logger.info("Adapter", adapter.name, "matched buffer", path)
-          matched_files[path] = true
           table.insert(adapters, adapter)
-          break
         end
       end
     end

@@ -530,10 +530,7 @@ function neotest.Client:_update_adapters(dir)
       and self._adapter_group:adapters_with_root_dir(dir)
     or {}
 
-  local adapters_with_bufs =
-    self._adapter_group:adapters_matching_open_bufs(lib.func_util.map(function(i, entry)
-      return i, entry.root
-    end, adapters_with_root))
+  local adapters_with_bufs = self._adapter_group:adapters_matching_open_bufs(adapters_with_root)
 
   local found = {}
   for adapter_id, _ in pairs(self._adapters) do
